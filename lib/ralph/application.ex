@@ -8,7 +8,7 @@ defmodule Ralph.Application do
   def start(_type, _args) do
     children = [
       # Ralph.Console
-      {Ralph.IRC.Connection, [Ralph.IRC]}
+      Ralph.Bot
     ]
 
     # IO.stream(:stdin, :line)
