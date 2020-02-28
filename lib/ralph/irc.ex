@@ -56,7 +56,7 @@ defmodule Ralph.IRC do
   ## Message Hooks
 
   defmacro on_command(command, handler, param_names) do
-    handler_name = :"fuck i dunno #{command}"
+    handler_name = :"_on_command_hook__line_#{__CALLER__.line}"
 
     quote do
       IO.inspect(@context, label: "what fuckin context")
@@ -89,14 +89,13 @@ defmodule Ralph.IRC do
   ## Network
 
   defmacro network(name, block) do
-    handler_name = :"__#{name}_on_line_handler"
+    handler_name = :"__on_network_hook_line_#{__CALLER__.line}"
 
     quote do
       %{networks: networks} = parent_ctx = Module.get_attribute(__MODULE__, :context)
       Module.put_attribute(__MODULE__, :context, %NetworkConfig{name: unquote(name)})
 
       unquote(block)
-
       network_ctx = Module.get_attribute(__MODULE__, :context)
       parent_ctx = %{parent_ctx | networks: [network_ctx | networks]}
       Module.put_attribute(__MODULE__, :context, parent_ctx)
