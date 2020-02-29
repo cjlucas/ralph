@@ -9,7 +9,7 @@ defmodule Ralph.Bot do
       IO.puts("whoaaaa #{inspect(ctx)}")
     end
 
-    on_message fn ctx ->
+    on_privmsg fn ctx ->
       IO.puts("getting messages too?! whoa. #{inspect(ctx)}")
     end
   end
@@ -19,18 +19,18 @@ defmodule Ralph.Bot do
     nick "hithere2"
 
     channel "#omghithere" do
-      on_message fn ctx ->
+      on_privmsg fn ctx ->
         privmsg ctx, ctx.channel, "sup bruh"
       end
     end
 
     channel "#omghithere2" do
-      on_message fn ctx ->
+      on_privmsg fn ctx ->
         privmsg ctx, "sup brug"
       end
     end
 
-    on_message fn ctx ->
+    on_privmsg fn ctx ->
       privmsg ctx, "i'm listening to both channels bruhggg!"
     end
 

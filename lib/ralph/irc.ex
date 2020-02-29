@@ -95,7 +95,7 @@ defmodule Ralph.IRC do
     end
   end
 
-  defmacro on_message(handler) do
+  defmacro on_privmsg(handler) do
     quote do
       on_command("PRIVMSG", unquote(handler), fn [target, message] ->
         %{channel: target, target: target, message: message}
