@@ -72,7 +72,7 @@ defmodule Ralph.IRC.MockClient do
     {:reply, :ok, state}
   end
 
-  def handle_info({:tcp, _, line}, {conn, pid} = state) do
+  def handle_info({:tcp, _, line}, {conn, _pid} = state) do
     line = Ralph.IRC.Protocol.parse_line(line)
     send(pid, {:line, line})
 

@@ -17,9 +17,8 @@ defmodule RalphTest do
   use ExUnit.Case
 
   setup do
-    {:ok, pid} = Ralph.IRC.MockServer.start_link()
-
-    {:ok, _pid} = TestBot.start_link([])
+    {:ok, _} = Ralph.IRC.MockServer.start_link()
+    {:ok, _} = TestBot.start_link([])
 
     {:ok, pid} =
       receive do
