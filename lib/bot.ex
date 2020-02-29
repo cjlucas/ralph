@@ -21,10 +21,22 @@ defmodule Ralph.Bot do
 
     channel "\#omghithere" do
       on_message(fn ctx ->
-        IO.puts("tight2. #{inspect(ctx)}")
+        IO.inspect("tight2. #{inspect(ctx)}")
         privmsg(ctx, ctx.channel, "sup bruh")
       end)
     end
+
+    channel "\#omghithere2" do
+      on_message(fn ctx ->
+        IO.inspect("omgdfjsaio. #{inspect(ctx)}")
+        privmsg(ctx, "sup brug")
+      end)
+    end
+
+    on_message(fn ctx ->
+      IO.inspect("omgdfjsaio. #{inspect(ctx)}")
+      privmsg(ctx, "i'm listening to both channels bruhggg!")
+    end)
   end
 
   # on_kick(channel, tgt, reason, fn ->
