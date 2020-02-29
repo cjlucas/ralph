@@ -86,7 +86,7 @@ defmodule Ralph.IRC do
       def unquote(handler_name)(network, {_, cmd, [target | _]} = message) do
         %{name: channel_name, hooks: hooks} = @channel_config
 
-        if cmd == "PRIVMSG" && target == channel_name do
+        if cmd in ["JOIN", "PRIVMSG"] && target == channel_name do
           Enum.each(hooks, fn hook ->
             apply(__MODULE__, hook, [
               %{mod: __MODULE__, network: @network_name, channel: channel_name},

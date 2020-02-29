@@ -5,7 +5,7 @@ defmodule Ralph.Application do
 
   def start(_type, _args) do
     children = [
-      Ralph.Bot
+      # Ralph.Bot
     ]
 
     opts = [strategy: :one_for_one, name: Ralph.Supervisor]
