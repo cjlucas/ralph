@@ -87,6 +87,12 @@ defmodule Ralph.IRC do
     end
   end
 
+  defmacro on_join(handler) do
+    quote do
+      on_command("JOIN", unquote(handler), [:channel])
+    end
+  end
+
   defmacro on_kick(handler) do
     quote do
       on_command("KICK", unquote(handler), [:channel, :target, :reason])
