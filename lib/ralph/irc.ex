@@ -40,7 +40,9 @@ defmodule Ralph.IRC do
       end
 
       # on_command?
-      def on_line({network, pid}, {prefix, command, params}) do
+      def on_line({network, pid}, {prefix, command, params} = message) do
+        IO.puts("yo #{inspect(message)}")
+
         case command do
           "KICK" ->
             [chan, tgt, reason] = params
@@ -51,7 +53,8 @@ defmodule Ralph.IRC do
         end
 
         Enum.each(@context.hooks, fn hook ->
-          apply(__MODULE__, hook, [network, {prefix, command, params}])
+          hook_ctx = %{network: network, message: message}
+          apply(__MODULE__, hook, [hook_ctx])
         end)
       end
     end
@@ -113,13 +116,13 @@ defmodule Ralph.IRC do
       Module.put_attribute(__MODULE__, :context, parent_ctx)
       Module.put_attribute(__MODULE__, :network_config, network_ctx)
 
-      def unquote(handler_name)(network, message) do
-        if network == unquote(name) do
-          IO.puts("whoa a thing happened on my network! #{network}")
+      def unquote(handler_name)(ctx) do
+        if ctx[:network] == unquote(name) do
+          IO.puts("whoa a thing happened on my network! #{ctx[:network]}")
           # TODO: go through network hooks
 
           Enum.each(@network_config.hooks, fn hook ->
-            apply(__MODULE__, hook, [%{mod: __MODULE__, network: unquote(name)}, message])
+            apply(__MODULE__, hook, [%{mod: __MODULE__, network: unquote(name)}, ctx[:message]])
           end)
         end
       end
