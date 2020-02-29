@@ -52,39 +52,12 @@ defmodule Ralph.IRC.Connection do
   def handle_info({:tcp, _sock, data}, %{bot: bot, config: config} = state) do
     pid = self()
 
-    data = data |> String.trim() |> parse_line
+    data = data |> String.trim() |> Ralph.IRC.Protocol.parse_line
 
     Task.start_link(fn ->
       bot.on_line({config.name, pid}, data)
     end)
 
     {:noreply, state}
-  end
-
-  def parse_line(line) do
-    [prefix, line] =
-      if String.starts_with?(line, ":") do
-        line = line |> String.split_at(1) |> elem(1)
-        String.split(line, " ", parts: 2)
-      else
-        [nil, line]
-      end
-
-    [command, params] = String.split(line, " ", parts: 2)
-
-    params = String.split(params)
-
-    params =
-      case Enum.find_index(params, fn param -> String.starts_with?(param, ":") end) do
-        nil ->
-          params
-
-        idx ->
-          {word_params, trailing_param} = Enum.split(params, idx)
-          trailing_param = trailing_param |> Enum.join(" ") |> String.split_at(1) |> elem(1)
-          word_params ++ [trailing_param]
-      end
-
-    {prefix, command, params}
   end
 end
