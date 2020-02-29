@@ -43,7 +43,7 @@ defmodule Ralph.Bot do
     end
 
     on_invite fn %{channel: channel} = ctx ->
-      join(ctx, channel)
+      join ctx, channel
     end
   end
 end
