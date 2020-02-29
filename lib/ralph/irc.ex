@@ -35,16 +35,7 @@ defmodule Ralph.IRC do
       end
 
       # on_command?
-      def on_line({network, pid}, {prefix, command, params} = message) do
-        case command do
-          "KICK" ->
-            [chan, tgt, reason] = params
-            Ralph.IRC.Connection.write(pid, "JOIN #{chan}\r\n")
-
-          _ ->
-            nil
-        end
-
+      def on_line({network, _}, {prefix, command, params} = message) do
         Enum.each(@context.hooks, fn hook ->
           hook_ctx = %{network: network, message: message}
           apply(__MODULE__, hook, [hook_ctx])
