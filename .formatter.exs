@@ -2,12 +2,16 @@
 
 locals_without_parens = [
   # Command Handlers
-  on_message: 1,
+  on_privmsg: 1,
   on_kick: 1,
   on_join: 1,
+  on_invite: 1,
+  on_part: 1,
 
   # Commands
+  send_message: 2,
   privmsg: :*,
+  join: 2,
 
   # Network
   network: 1,

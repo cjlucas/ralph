@@ -20,7 +20,7 @@ defmodule Ralph.IRC.Commands do
   defmacro privmsg(ctx, target, message) do
     quote do
       data = Ralph.IRC.Protocol.privmsg(unquote(target), unquote(message))
-      send_message(unquote(ctx), data)
+      send_message unquote(ctx), data
     end
   end
 
@@ -29,7 +29,7 @@ defmodule Ralph.IRC.Commands do
   defmacro join(ctx, channel) do
     quote do
       data = Ralph.IRC.Protocol.join(unquote(channel))
-      send_message(unquote(ctx), data)
+      send_message unquote(ctx), data
     end
   end
 end
