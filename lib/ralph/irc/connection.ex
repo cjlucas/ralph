@@ -1,6 +1,10 @@
 defmodule Ralph.IRC.Connection do
   use GenServer
 
+  defmodule State do
+    defstruct bot: nil, conn: nil, config: nil
+  end
+
   def start_link([bot, registry, config]) do
     GenServer.start_link(__MODULE__, {bot, registry, config})
   end
@@ -15,7 +19,12 @@ defmodule Ralph.IRC.Connection do
 
   def init({bot, registry, config}) do
     {:ok, _} = Ralph.IRC.NetworkRegistry.register(registry, config.name)
+    state = %State{bot: bot, config: config}
 
+    {:ok, state, {:continue, :ok}}
+  end
+
+  def handle_continue(:ok, %{config: config} = state) do
     server = List.first(config.servers) |> String.to_charlist()
     {:ok, conn} = :gen_tcp.connect(server, 6667, [])
     :ok = :inet.setopts(conn, active: true, mode: :binary, packet: :line, nodelay: true)
@@ -31,22 +40,22 @@ defmodule Ralph.IRC.Connection do
       do_write(conn, data)
     end)
 
-    {:ok, {conn, bot, [], config.name}}
+    {:noreply, %{state | conn: conn}}
   end
 
-  def handle_call({:write, data}, _from, {conn, bot, acc, _} = state) do
+  def handle_call({:write, data}, _from, %{conn: conn} = state) do
     do_write(conn, data)
 
     {:reply, :ok, state}
   end
 
-  def handle_info({:tcp, _sock, data}, {conn, bot, acc, network_name} = state) do
+  def handle_info({:tcp, _sock, data}, %{bot: bot, config: config} = state) do
     pid = self()
 
     data = data |> String.trim() |> parse_line
 
     Task.start_link(fn ->
-      bot.on_line({network_name, pid}, data)
+      bot.on_line({config.name, pid}, data)
     end)
 
     {:noreply, state}
