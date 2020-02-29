@@ -19,12 +19,6 @@ defmodule RalphTest do
   setup do
     {:ok, pid} = Ralph.IRC.MockServer.start_link()
 
-    on_exit(fn ->
-      if Process.alive?(pid) do
-        GenServer.stop(pid)
-      end
-    end)
-
     {:ok, _pid} = TestBot.start_link([])
 
     {:ok, pid} =
