@@ -18,8 +18,6 @@ defmodule Ralph.IRC do
       import Ralph.IRC
 
       Module.register_attribute(__MODULE__, :context, persist: true)
-      Module.register_attribute(__MODULE__, :hook_idx, persist: true, accumulate: true)
-
       Module.put_attribute(__MODULE__, :context, %RootConfig{mod: __MODULE__})
 
       @before_compile unquote(__MODULE__)
@@ -33,16 +31,11 @@ defmodule Ralph.IRC do
       end
 
       def start_link(_opts) do
-        IO.puts("hithere")
-        IO.inspect(@context)
-
         Ralph.IRC.Supervisor.start_link(@context)
       end
 
       # on_command?
       def on_line({network, pid}, {prefix, command, params} = message) do
-        IO.puts("yo #{inspect(message)}")
-
         case command do
           "KICK" ->
             [chan, tgt, reason] = params
@@ -66,8 +59,6 @@ defmodule Ralph.IRC do
     handler_name = :"_on_command_hook__line_#{__CALLER__.line}"
 
     quote do
-      IO.inspect(@context, label: "what fuckin context")
-
       def unquote(handler_name)(context, {prefix, cmd, params}) do
         if cmd == unquote(command) do
           params =
@@ -123,12 +114,11 @@ defmodule Ralph.IRC do
       Module.put_attribute(__MODULE__, :network_config, network_ctx)
 
       def unquote(handler_name)(ctx) do
-        if ctx[:network] == unquote(name) do
-          IO.puts("whoa a thing happened on my network! #{ctx[:network]}")
-          # TODO: go through network hooks
+        %{name: network_name, hooks: hooks} = @network_config
 
-          Enum.each(@network_config.hooks, fn hook ->
-            apply(__MODULE__, hook, [%{mod: __MODULE__, network: unquote(name)}, ctx[:message]])
+        if ctx[:network] == network_name do
+          Enum.each(hooks, fn hook ->
+            apply(__MODULE__, hook, [%{mod: __MODULE__, network: network_name}, ctx[:message]])
           end)
         end
       end
@@ -157,13 +147,12 @@ defmodule Ralph.IRC do
       Module.put_attribute(__MODULE__, :channel_config, channel_ctx)
 
       def unquote(handler_name)(network, {_, cmd, [target | _]} = message) do
-        if cmd == "PRIVMSG" && target == unquote(name) do
-          IO.puts("whoa got a msg in my chan #{unquote(name)}")
-          # TODO: go through network hooks
+        %{name: channel_name, hooks: hooks} = @channel_config
 
-          Enum.each(@channel_config.hooks, fn hook ->
+        if cmd == "PRIVMSG" && target == channel_name do
+          Enum.each(hooks, fn hook ->
             apply(__MODULE__, hook, [
-              %{mod: __MODULE__, network: @network_name, channel: unquote(name)},
+              %{mod: __MODULE__, network: @network_name, channel: channel_name},
               message
             ])
           end)

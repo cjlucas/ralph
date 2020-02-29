@@ -2,7 +2,7 @@ defmodule Ralph.Bot do
   use Ralph.IRC
 
   network :freenode do
-    server "irc.freenode.net" 
+    server "irc.freenode.net"
     nick "hithere"
 
     on_kick fn ctx ->
