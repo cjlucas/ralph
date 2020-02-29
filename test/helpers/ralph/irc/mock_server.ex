@@ -38,6 +38,8 @@ defmodule Ralph.IRC.MockServer do
 
   defp accept_loop(pid, conn) do
     {:ok, client} = :gen_tcp.accept(conn)
+    :inet.setopts(client, packet: :line)
+
     :ok = :gen_tcp.controlling_process(client, pid)
 
     send(pid, {:client_connected, client})
