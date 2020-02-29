@@ -23,6 +23,7 @@ defmodule Ralph.IRC.Commands do
       send_message(unquote(ctx), data)
     end
   end
+
   def privmsg(ctx, message), do: privmsg(ctx, ctx.channel, message)
 
   defmacro join(ctx, channel) do

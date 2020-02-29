@@ -11,7 +11,8 @@ defmodule Ralph.IRC.Client do
 
       # on_command?
       def on_line({network, _}, {prefix, command, params} = message) do
-        Logger.debug("Received message #{inspect message}")
+        Logger.debug("Received message #{inspect(message)}")
+
         Enum.each(@context.hooks, fn hook ->
           hook_ctx = %{network: network, message: message}
           apply(__MODULE__, hook, [hook_ctx])

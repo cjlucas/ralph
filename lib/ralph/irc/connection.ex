@@ -52,7 +52,7 @@ defmodule Ralph.IRC.Connection do
   def handle_info({:tcp, _sock, data}, %{bot: bot, config: config} = state) do
     pid = self()
 
-    data = data |> String.trim() |> Ralph.IRC.Protocol.parse_line
+    data = data |> String.trim() |> Ralph.IRC.Protocol.parse_line()
 
     Task.start_link(fn ->
       bot.on_line({config.name, pid}, data)

@@ -6,10 +6,11 @@ defmodule Ralph.IRC.Supervisor do
       {Ralph.IRC.NetworkRegistry, registry}
     ]
 
-    connections = Enum.map(config.networks, fn network ->
-      spec = {Ralph.IRC.Connection, [config.mod, registry, network]}
-      Supervisor.child_spec(spec, id: network.name)
-    end)
+    connections =
+      Enum.map(config.networks, fn network ->
+        spec = {Ralph.IRC.Connection, [config.mod, registry, network]}
+        Supervisor.child_spec(spec, id: network.name)
+      end)
 
     Supervisor.start_link(children ++ connections, strategy: :one_for_one)
   end

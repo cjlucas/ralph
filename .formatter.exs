@@ -13,7 +13,7 @@ locals_without_parens = [
   network: 1,
   server: 1,
   servers: 1,
-  nick: 1
+  nick: 1,
 
   # Channel
   channel: 1
