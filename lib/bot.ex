@@ -19,9 +19,12 @@ defmodule Ralph.Bot do
     server("irc.freenode.net")
     nick("hithere2")
 
-    on_message(fn ctx ->
-      IO.puts("tight. #{inspect(ctx)}")
-    end)
+    channel "\#omghithere" do
+      on_message(fn ctx ->
+        IO.puts("tight2. #{inspect(ctx)}")
+        privmsg(ctx, ctx.channel, "sup bruh")
+      end)
+    end
   end
 
   # on_kick(channel, tgt, reason, fn ->

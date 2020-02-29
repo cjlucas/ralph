@@ -6,4 +6,13 @@ defmodule Ralph.IRC.NetworkRegistry do
   def start_link(name) do
     Registry.start_link(keys: :unique, name: name)
   end
+
+  def register(registry, network) do
+    Registry.register(registry, network, [])
+  end
+
+  def lookup(registry, network, block) do
+    [{pid, _}] = Registry.lookup(registry, network)
+    block.(pid)
+  end
 end

@@ -8,7 +8,7 @@ defmodule Ralph.IRC.Supervisor do
 
     connections =
       Enum.map(config.networks, fn network ->
-        spec = {Ralph.IRC.Connection, [config.mod, network]}
+        spec = {Ralph.IRC.Connection, [config.mod, registry, network]}
         Supervisor.child_spec(spec, id: network.name)
       end)
 

@@ -6,7 +6,11 @@ defmodule Ralph.IRC do
   end
 
   defmodule NetworkConfig do
-    defstruct name: nil, servers: [], nick: nil, hooks: []
+    defstruct name: nil, servers: [], channels: [], nick: nil, hooks: []
+  end
+
+  defmodule ChannelConfig do
+    defstruct name: nil, hooks: []
   end
 
   defmacro __using__(_opts) do
@@ -116,6 +120,40 @@ defmodule Ralph.IRC do
     end
   end
 
+  ## Channel
+
+  defmacro channel(name, block) do
+    handler_name = :"__on_channel_hook_line_#{__CALLER__.line}"
+
+    quote do
+      %{name: network_name, channels: channels} =
+        parent_ctx = Module.get_attribute(__MODULE__, :context)
+
+      Module.put_attribute(__MODULE__, :context, %ChannelConfig{name: unquote(name)})
+
+      unquote(block)
+
+      channel_ctx = Module.get_attribute(__MODULE__, :context)
+      parent_ctx = %{parent_ctx | channels: [channel_ctx | channels]}
+      Module.put_attribute(__MODULE__, :context, parent_ctx)
+      Module.put_attribute(__MODULE__, :network_name, network_name)
+      Module.put_attribute(__MODULE__, :channel_config, channel_ctx)
+
+      def unquote(handler_name)(network, {_, cmd, [target | _]} = message) do
+        if cmd == "PRIVMSG" && target == unquote(name) do
+          IO.puts("whoa got a msg in my chan #{unquote(name)}")
+          # TODO: go through network hooks
+
+          Enum.each(@channel_config.hooks, fn hook ->
+            apply(__MODULE__, hook, [%{network: @network_name, channel: unquote(name)}, message])
+          end)
+        end
+      end
+
+      add_hook(unquote(handler_name))
+    end
+  end
+
   defmacro update_context(attrs) do
     quote do
       attrs = unquote(attrs) |> Enum.into(%{})
@@ -156,6 +194,22 @@ defmodule Ralph.IRC do
   defmacro nick(nick) do
     quote do
       update_context(nick: unquote(nick))
+    end
+  end
+
+  ## Commands
+
+  defmacro privmsg(_, target, message) do
+    # TODO: remove this
+    network = :freenode2
+
+    quote do
+      registry = Module.concat([__MODULE__, Registry])
+
+      Ralph.IRC.NetworkRegistry.lookup(registry, unquote(network), fn pid ->
+        data = Ralph.IRC.Protocol.privmsg(unquote(target), unquote(message))
+        Ralph.IRC.Connection.write(pid, data)
+      end)
     end
   end
 end

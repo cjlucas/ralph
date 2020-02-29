@@ -1,8 +1,8 @@
 defmodule Ralph.IRC.Connection do
   use GenServer
 
-  def start_link([bot, config]) do
-    GenServer.start_link(__MODULE__, {bot, config})
+  def start_link([bot, registry, config]) do
+    GenServer.start_link(__MODULE__, {bot, registry, config})
   end
 
   def write(pid, data) do
@@ -14,8 +14,9 @@ defmodule Ralph.IRC.Connection do
     :gen_tcp.send(conn, data) |> IO.inspect()
   end
 
-  def init({bot, config}) do
+  def init({bot, registry, config}) do
     IO.inspect(config, label: "in init")
+    {:ok, _} = Ralph.IRC.NetworkRegistry.register(registry, config.name)
 
     server = List.first(config.servers) |> String.to_charlist()
     {:ok, conn} = :gen_tcp.connect(server, 6667, [])
@@ -33,8 +34,10 @@ defmodule Ralph.IRC.Connection do
     # do_write(conn, "PASS admin:admin")
     # do_write(conn, "\r\n")
 
-    do_write(conn, "JOIN \#omghithere")
-    do_write(conn, "\r\n")
+    Enum.each(config.channels, fn %{name: name} ->
+      do_write(conn, "JOIN #{name}")
+      do_write(conn, "\r\n")
+    end)
 
     do_write(conn, "PRIVMSG \#omghithere :howdy!")
     do_write(conn, "\r\n")
