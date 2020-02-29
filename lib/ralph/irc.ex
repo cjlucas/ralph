@@ -31,22 +31,7 @@ defmodule Ralph.IRC do
 
   defmacro __before_compile__(_env) do
     quote do
-      def child_spec(opts) do
-        %{id: __MODULE__, start: {__MODULE__, :start_link, [opts]}}
-      end
-
-      def start_link(_opts) do
-        Ralph.IRC.Supervisor.start_link(@context)
-      end
-
-      # on_command?
-      def on_line({network, _}, {prefix, command, params} = message) do
-        Logger.debug("Received message #{inspect message}")
-        Enum.each(@context.hooks, fn hook ->
-          hook_ctx = %{network: network, message: message}
-          apply(__MODULE__, hook, [hook_ctx])
-        end)
-      end
+      use Ralph.IRC.Client
     end
   end
 
