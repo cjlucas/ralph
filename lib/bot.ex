@@ -37,5 +37,13 @@ defmodule Ralph.Bot do
     on_join fn %{channel: channel} = ctx ->
       privmsg ctx, "greetings! welcome to #{channel}"
     end
+
+    on_part fn ctx ->
+      privmsg ctx, "good riddance!"
+    end
+
+    on_invite fn %{channel: channel} = ctx ->
+      join ctx, channel
+    end
   end
 end

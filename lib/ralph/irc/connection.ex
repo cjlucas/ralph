@@ -10,7 +10,6 @@ defmodule Ralph.IRC.Connection do
   end
 
   def do_write(conn, data) do
-    IO.inspect("--> #{data}")
     :gen_tcp.send(conn, data) |> IO.inspect()
   end
 

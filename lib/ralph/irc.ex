@@ -16,6 +16,7 @@ defmodule Ralph.IRC do
   defmacro __using__(_opts) do
     quote do
       import Ralph.IRC
+      require Logger
 
       Module.register_attribute(__MODULE__, :context, persist: true)
       Module.put_attribute(__MODULE__, :context, %RootConfig{mod: __MODULE__})
@@ -36,6 +37,7 @@ defmodule Ralph.IRC do
 
       # on_command?
       def on_line({network, _}, {prefix, command, params} = message) do
+        Logger.debug("Received message #{inspect message}")
         Enum.each(@context.hooks, fn hook ->
           hook_ctx = %{network: network, message: message}
           apply(__MODULE__, hook, [hook_ctx])
@@ -75,9 +77,21 @@ defmodule Ralph.IRC do
     end
   end
 
+  defmacro on_part(handler) do
+    quote do
+      on_command("PART", unquote(handler), [:channel])
+    end
+  end
+
   defmacro on_kick(handler) do
     quote do
       on_command("KICK", unquote(handler), [:channel, :target, :reason])
+    end
+  end
+
+  defmacro on_invite(handler) do
+    quote do
+      on_command("INVITE", unquote(handler), [:target, :channel])
     end
   end
 
@@ -212,4 +226,16 @@ defmodule Ralph.IRC do
   end
 
   def privmsg(ctx, message), do: privmsg(ctx, ctx.channel, message)
+
+  defmacro join(ctx, channel) do
+    quote do
+      %{mod: mod, network: network} = unquote(ctx)
+      registry = Module.concat([mod, Registry])
+
+      Ralph.IRC.NetworkRegistry.lookup(registry, network, fn pid ->
+        data = Ralph.IRC.Protocol.join(unquote(channel))
+        Ralph.IRC.Connection.write(pid, data)
+      end)
+    end
+  end
 end

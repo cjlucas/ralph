@@ -19,7 +19,7 @@ defmodule Ralph.IRC.Protocol do
     "USER #{user_name} #{host_name} #{server_name} :#{real_name}\r\n\r\n"
   end
 
-  defp write(data, pid) do
-    Ralph.IRC.Connection.write(pid, data)
+  def join(channel) do
+    "JOIN #{channel}\r\n"
   end
 end
