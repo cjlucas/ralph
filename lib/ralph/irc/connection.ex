@@ -10,36 +10,26 @@ defmodule Ralph.IRC.Connection do
   end
 
   def do_write(conn, data) do
-    :gen_tcp.send(conn, data) |> IO.inspect()
+    :gen_tcp.send(conn, [data, "\r\n"])
   end
 
   def init({bot, registry, config}) do
-    IO.inspect(config, label: "in init")
     {:ok, _} = Ralph.IRC.NetworkRegistry.register(registry, config.name)
 
     server = List.first(config.servers) |> String.to_charlist()
     {:ok, conn} = :gen_tcp.connect(server, 6667, [])
-    # {:ok, conn} = :gen_tcp.connect('localhost', 43269, [])
     :ok = :inet.setopts(conn, active: true, mode: :binary, packet: :line, nodelay: true)
 
-    data = Ralph.IRC.Protocol.nick(config.nick || "foobar")
+    data = Ralph.IRC.Protocol.nick(config.nick)
     do_write(conn, data)
-    do_write(conn, "\r\n")
 
     data = Ralph.IRC.Protocol.user("chris", "chris", "chris", "chris")
     do_write(conn, data)
-    do_write(conn, "\r\n")
-
-    # do_write(conn, "PASS admin:admin")
-    # do_write(conn, "\r\n")
 
     Enum.each(config.channels, fn %{name: name} ->
-      do_write(conn, "JOIN #{name}")
-      do_write(conn, "\r\n")
+      data = Ralph.IRC.Protocol.join(name)
+      do_write(conn, data)
     end)
-
-    do_write(conn, "PRIVMSG \#omghithere :howdy!")
-    do_write(conn, "\r\n")
 
     {:ok, {conn, bot, [], config.name}}
   end
