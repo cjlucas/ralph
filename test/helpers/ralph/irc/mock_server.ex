@@ -59,7 +59,7 @@ defmodule Ralph.IRC.MockClient do
   ## Client
 
   def init({sock, pid}) do
-    :inet.setopts(sock, active: true, packet: :line)
+    :inet.setopts(sock, active: :once, packet: :line)
 
     {:ok, {sock, pid}}
   end
@@ -70,10 +70,12 @@ defmodule Ralph.IRC.MockClient do
     {:reply, :ok, state}
   end
 
-  def handle_info({:tcp, _, line}, {_, pid} = state) do
+  def handle_info({:tcp, _, line}, {conn, pid} = state) do
     IO.inspect(line, label: "got a line")
     line = Ralph.IRC.Protocol.parse_line(line)
     send(pid, {:line, line})
+
+    :inet.setopts(conn, active: :once, packet: :line)
 
     {:noreply, state}
   end
