@@ -9,6 +9,10 @@ defmodule Ralph.IRC.Client do
         Ralph.IRC.Supervisor.start_link(@context)
       end
 
+      def config do
+        @context
+      end
+
       # on_command?
       def on_line({network, _}, {prefix, command, params} = message) do
         Logger.debug("Received message #{inspect(message)}")

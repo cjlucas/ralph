@@ -47,7 +47,7 @@ defmodule RalphTest do
 
     setup_server!()
 
-    run_scenario exhaustive: false do
+    run_scenario do
       write_line ":foo JOIN #test"
       write_line ":foo JOIN #test2"
 

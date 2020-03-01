@@ -72,7 +72,12 @@ defmodule Ralph.IRC.TestHelper do
         if unquote(opts[:ignore_prelude]) do
           assert_line "NICK", [_]
           assert_line "USER", [_, _, _, _]
-          assert_line "JOIN", [_]
+
+          channels = List.first(@scenario_name.config.networks).channels
+
+          Enum.each(channels, fn %{name: channel_name} ->
+            assert_line "JOIN", [^channel_name]
+          end)
         end
 
         unquote(block)
