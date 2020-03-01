@@ -91,4 +91,17 @@ defmodule RalphTest do
       assert_line "JOIN", ["#foobar"]
     end
   end
+
+  scenario "on_ping" do
+    bot_with_test_network do
+      on_ping(fn ctx ->
+        privmsg ctx, "cjlio", "i got a ping!"
+      end)
+    end
+
+    run_scenario do
+      write_line "PING :server@example.com"
+      assert_line "PRIVMSG", ["cjlio", "i got a ping!"]
+    end
+  end
 end

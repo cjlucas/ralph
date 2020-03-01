@@ -61,4 +61,10 @@ defmodule Ralph.IRC.Hooks do
       end)
     end
   end
+
+  defmacro on_ping(handler) do
+    quote do
+      on_command("PING", unquote(handler), [])
+    end
+  end
 end
