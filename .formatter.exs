@@ -24,7 +24,8 @@ exported_locals_without_parens = [
 ]
 
 test_locals_without_parens = [
-  assert_line: :*
+  assert_line: :*,
+  write_line: :*
 ]
 
 [

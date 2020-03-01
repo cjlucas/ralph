@@ -48,8 +48,8 @@ defmodule RalphTest do
     setup_server!()
 
     run_scenario exhaustive: false do
-      write_line(":foo JOIN #test")
-      write_line(":foo JOIN #test2")
+      write_line ":foo JOIN #test"
+      write_line ":foo JOIN #test2"
 
       assert_line "PRIVMSG", ["#test", "i joined #test!"]
       assert_line "PRIVMSG", ["#test", "i joined a channel: #test"]
@@ -76,8 +76,8 @@ defmodule RalphTest do
     setup_server!()
 
     run_scenario do
-      write_line(":foo JOIN #test")
-      write_line(":foo KICK #test test_nick :and stay out!")
+      write_line ":foo JOIN #test"
+      write_line ":foo KICK #test test_nick :and stay out!"
 
       assert_line "JOIN", ["#test"]
       assert_line "PRIVMSG", ["#test", "you kicked me for reason: \"and stay out!\""]
