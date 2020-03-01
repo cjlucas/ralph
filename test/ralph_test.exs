@@ -55,6 +55,7 @@ defmodule RalphTest do
     assert_line "NICK", ["test_nick"]
     assert_line "USER", ["chris", "chris", "chris", "chris"]
     assert_line "JOIN", ["#test"]
+    assert_line "JOIN", ["#test2"]
 
     :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test")
     :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test2")
@@ -64,5 +65,7 @@ defmodule RalphTest do
 
     assert_line "PRIVMSG", ["#test2", "i joined #test2!"]
     assert_line "PRIVMSG", ["#test2", "i joined a channel: #test2"]
+
+    assert {:messages, []} == :erlang.process_info(self(), :messages)
   end
 end
