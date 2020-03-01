@@ -1,4 +1,6 @@
 defmodule Ralph.IRC.Commands do
+  @moduledoc false
+
   defmacro __using__(_opts) do
     quote do
       import Ralph.IRC.Commands

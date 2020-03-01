@@ -1,6 +1,8 @@
 defmodule Ralph.Bot do
   use Ralph.IRC
 
+  @moduledoc false
+
   network :freenode do
     server "irc.freenode.net"
     nick "hithere"

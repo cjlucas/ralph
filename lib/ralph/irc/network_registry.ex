@@ -1,4 +1,6 @@
 defmodule Ralph.IRC.NetworkRegistry do
+  @moduledoc false
+
   def child_spec(name) do
     %{id: __MODULE__, start: {__MODULE__, :start_link, [name]}}
   end

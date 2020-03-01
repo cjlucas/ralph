@@ -1,7 +1,11 @@
 defmodule Ralph.IRC.Connection do
   use GenServer
 
+  @moduledoc false
+
   defmodule State do
+    @moduledoc false
+
     defstruct bot: nil, conn: nil, config: nil
   end
 

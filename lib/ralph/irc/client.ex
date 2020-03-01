@@ -1,4 +1,6 @@
 defmodule Ralph.IRC.Client do
+  @moduledoc false
+
   defmacro __using__(_opts) do
     quote do
       def child_spec(opts) do

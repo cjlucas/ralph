@@ -1,15 +1,23 @@
 defmodule Ralph.IRC do
+  @moduledoc false
+
   ## Configuration
 
   defmodule RootConfig do
+    @moduledoc false
+
     defstruct mod: nil, networks: [], hooks: []
   end
 
   defmodule NetworkConfig do
+    @moduledoc false
+
     defstruct name: nil, servers: [], channels: [], nick: nil, hooks: []
   end
 
   defmodule ChannelConfig do
+    @moduledoc false
+
     defstruct name: nil, hooks: []
   end
 

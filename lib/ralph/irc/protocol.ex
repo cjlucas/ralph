@@ -1,4 +1,6 @@
 defmodule Ralph.IRC.Protocol do
+  @moduledoc false
+
   def join(channel) do
     "JOIN #{channel}"
   end

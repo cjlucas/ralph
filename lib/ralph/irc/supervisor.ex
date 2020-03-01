@@ -1,4 +1,6 @@
 defmodule Ralph.IRC.Supervisor do
+  @moduledoc false
+
   def start_link(config) do
     registry = Module.concat([config.mod, Registry])
 
