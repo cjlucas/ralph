@@ -1,6 +1,6 @@
 # Used by "mix format"
 
-locals_without_parens = [
+exported_locals_without_parens = [
   # Command Handlers
   on_privmsg: 1,
   on_kick: 1,
@@ -23,10 +23,14 @@ locals_without_parens = [
   channel: 1
 ]
 
+test_locals_without_parens = [
+  assert_line: :*
+]
+
 [
   inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"],
-  locals_without_parens: locals_without_parens,
+  locals_without_parens: exported_locals_without_parens ++ test_locals_without_parens,
   export: [
-    locals_without_parens: locals_without_parens
+    locals_without_parens: exported_locals_without_parens
   ]
 ]

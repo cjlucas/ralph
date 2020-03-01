@@ -26,6 +26,12 @@ end
 defmodule RalphTest do
   use ExUnit.Case
 
+  defmacro assert_line(command, params) do
+    quote do
+      assert_receive {:line, {_, unquote(command), unquote(params)}}, 100
+    end
+  end
+
   setup do
     {:ok, _} = Ralph.IRC.MockServer.start_link()
     {:ok, _} = TestBot.start_link([])
@@ -46,17 +52,17 @@ defmodule RalphTest do
   end
 
   test "greets the world", %{mock_client: mock_client} do
-    assert_receive {:line, {_, "NICK", ["test_nick"]}}, 100
-    assert_receive {:line, {_, "USER", ["chris", "chris", "chris", "chris"]}}, 100
-    assert_receive {:line, {_, "JOIN", ["#test"]}}, 100
+    assert_line "NICK", ["test_nick"]
+    assert_line "USER", ["chris", "chris", "chris", "chris"]
+    assert_line "JOIN", ["#test"]
 
     :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test")
     :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test2")
 
-    assert_receive {:line, {_, "PRIVMSG", ["#test", "i joined #test!"]}}, 100
-    assert_receive {:line, {_, "PRIVMSG", ["#test", "i joined a channel: #test"]}}, 100
+    assert_line "PRIVMSG", ["#test", "i joined #test!"]
+    assert_line "PRIVMSG", ["#test", "i joined a channel: #test"]
 
-    assert_receive {:line, {_, "PRIVMSG", ["#test2", "i joined #test2!"]}}, 100
-    assert_receive {:line, {_, "PRIVMSG", ["#test2", "i joined a channel: #test2"]}}, 100
+    assert_line "PRIVMSG", ["#test2", "i joined #test2!"]
+    assert_line "PRIVMSG", ["#test2", "i joined a channel: #test2"]
   end
 end
