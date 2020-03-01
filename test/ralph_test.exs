@@ -78,4 +78,17 @@ defmodule RalphTest do
       assert_line "PRIVMSG", ["#test", "general on_kick handler called"]
     end
   end
+
+  scenario "autojoin on invite" do
+    bot_with_test_network do
+      on_invite fn %{channel: channel} = ctx ->
+        join ctx, channel
+      end
+    end
+
+    run_scenario do
+      write_line ":foo INVITE test_user #foobar"
+      assert_line "JOIN", ["#foobar"]
+    end
+  end
 end
