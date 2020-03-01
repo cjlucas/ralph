@@ -7,8 +7,18 @@ defmodule TestBot do
 
     channel "#test" do
       on_join fn ctx ->
-        privmsg ctx, "hi there!"
+        privmsg ctx, "i joined #test!"
       end
+    end
+
+    channel "#test2" do
+      on_join fn ctx ->
+        privmsg ctx, "i joined #test2!"
+      end
+    end
+
+    on_join fn %{channel: channel} = ctx ->
+      privmsg ctx, "i joined a channel: #{channel}"
     end
   end
 end
@@ -41,6 +51,12 @@ defmodule RalphTest do
     assert_receive {:line, {_, "JOIN", ["#test"]}}, 100
 
     :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test")
-    assert_receive {:line, {_, "PRIVMSG", ["#test", "hi there!"]}}, 100
+    :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test2")
+
+    assert_receive {:line, {_, "PRIVMSG", ["#test", "i joined #test!"]}}, 100
+    assert_receive {:line, {_, "PRIVMSG", ["#test", "i joined a channel: #test"]}}, 100
+
+    assert_receive {:line, {_, "PRIVMSG", ["#test2", "i joined #test2!"]}}, 100
+    assert_receive {:line, {_, "PRIVMSG", ["#test2", "i joined a channel: #test2"]}}, 100
   end
 end

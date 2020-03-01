@@ -20,10 +20,7 @@ defmodule Ralph.IRC.MockServer do
   end
 
   def handle_info({:client_connected, conn}, {_, _, notify_pid} = state) do
-    IO.puts("got a client!")
-
     :ok = :gen_tcp.controlling_process(conn, notify_pid)
-
     send(notify_pid, {:client_connected, conn})
 
     {:noreply, state}
