@@ -16,14 +16,20 @@ defmodule Ralph.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Ralph.Application, []}
+      mod: {Ralph.Application, bots: bots(Mix.env())}
     ]
+  end
+
+  def bots(:test), do: []
+
+  def bots(_) do
+    [Ralph.Bot]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false}
     ]
   end
 
