@@ -68,9 +68,12 @@ defmodule Ralph.IRC.TestHelper do
       |> Keyword.put_new(:exhaustive, true)
 
     quote do
-      setup_server!
+      setup_server!()
 
       test "run scenario", %{mock_client: var!(mock_client)} do
+        # Suppress unused variable warnings
+        _ = var!(mock_client)
+
         if unquote(opts[:ignore_prelude]) do
           assert_line "NICK", [_]
           assert_line "USER", [_, _, _, _]
