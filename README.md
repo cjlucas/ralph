@@ -4,18 +4,10 @@
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ralph` to your list of dependencies in `mix.exs`:
+For now, just:
 
-```elixir
-def deps do
-  [
-    {:ralph, "~> 0.1.0"}
-  ]
-end
+```bash
+iex -S mix
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/ralph](https://hexdocs.pm/ralph).
-
+This will run the bot defined in the Ralph.Bot module.
