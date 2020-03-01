@@ -1,71 +1,87 @@
-defmodule TestBot do
-  use Ralph.IRC
-
-  network :test do
-    server "localhost"
-    nick "test_nick"
-
-    channel "#test" do
-      on_join fn ctx ->
-        privmsg ctx, "i joined #test!"
-      end
-    end
-
-    channel "#test2" do
-      on_join fn ctx ->
-        privmsg ctx, "i joined #test2!"
-      end
-    end
-
-    on_join fn %{channel: channel} = ctx ->
-      privmsg ctx, "i joined a channel: #{channel}"
-    end
-  end
-end
-
 defmodule RalphTest do
   use ExUnit.Case
+  use Ralph.IRC.TestHelper
 
-  defmacro assert_line(command, params) do
-    quote do
-      assert_receive {:line, {_, unquote(command), unquote(params)}}, 100
+  scenario "prelude" do
+    bot do
+      network :test do
+        server "localhost"
+        nick "test_nick"
+
+        channel "#test" do
+        end
+
+        channel "#test2" do
+        end
+      end
+    end
+
+    setup_server!()
+
+    run_scenario ignore_prelude: false do
+      assert_line "NICK", ["test_nick"]
+      assert_line "USER", ["chris", "chris", "chris", "chris"]
+      assert_line "JOIN", ["#test"]
+      assert_line "JOIN", ["#test2"]
     end
   end
 
-  setup do
-    {:ok, _} = Ralph.IRC.MockServer.start_link()
-    {:ok, _} = TestBot.start_link([])
-
-    {:ok, pid} =
-      receive do
-        {:client_connected, conn} ->
-          {:ok, pid} = Ralph.IRC.MockClient.start_link(conn)
-          :ok = :gen_tcp.controlling_process(conn, pid)
-
-          {:ok, pid}
-      after
-        5000 ->
-          raise "failed to connect"
+  scenario "connect and join" do
+    bot_with_test_network do
+      channel "#test" do
+        on_join fn ctx ->
+          privmsg ctx, "i joined #test!"
+        end
       end
 
-    [mock_client: pid]
+      channel "#test2" do
+        on_join fn ctx ->
+          privmsg ctx, "i joined #test2!"
+        end
+      end
+
+      on_join fn %{channel: channel} = ctx ->
+        privmsg ctx, "i joined a channel: #{channel}"
+      end
+    end
+
+    setup_server!()
+
+    run_scenario exhaustive: false do
+      write_line(":foo JOIN #test")
+      write_line(":foo JOIN #test2")
+
+      assert_line "PRIVMSG", ["#test", "i joined #test!"]
+      assert_line "PRIVMSG", ["#test", "i joined a channel: #test"]
+
+      assert_line "PRIVMSG", ["#test2", "i joined #test2!"]
+      assert_line "PRIVMSG", ["#test2", "i joined a channel: #test2"]
+    end
   end
 
-  test "greets the world", %{mock_client: mock_client} do
-    assert_line "NICK", ["test_nick"]
-    assert_line "USER", ["chris", "chris", "chris", "chris"]
-    assert_line "JOIN", ["#test"]
-    assert_line "JOIN", ["#test2"]
+  scenario "kick and rejoin" do
+    bot_with_test_network do
+      channel "#test" do
+        on_kick fn %{channel: channel, reason: reason} = ctx ->
+          join ctx, channel
+          privmsg ctx, "how dare you kick me for \"#{reason}\""
+        end
+      end
 
-    :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test")
-    :ok = Ralph.IRC.MockClient.write(mock_client, ":foo JOIN #test2")
+      on_kick fn ctx ->
+        privmsg ctx, "wait what?"
+      end
+    end
 
-    assert_line "PRIVMSG", ["#test", "i joined #test!"]
-    assert_line "PRIVMSG", ["#test", "i joined a channel: #test"]
+    setup_server!()
 
-    assert_line "PRIVMSG", ["#test2", "i joined #test2!"]
-    assert_line "PRIVMSG", ["#test2", "i joined a channel: #test2"]
+    run_scenario do
+      write_line(":foo JOIN #test")
+      write_line(":foo KICK #test test_nick :and stay out!")
 
-    assert {:messages, []} == :erlang.process_info(self(), :messages)
+      assert_line "JOIN", ["#test"]
+      assert_line "PRIVMSG", ["#test", "how dare you kick me for \"and stay out!\""]
+      assert_line "PRIVMSG", ["#test", "wait what?"]
+    end
   end
 end

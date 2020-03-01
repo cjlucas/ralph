@@ -10,9 +10,17 @@ defmodule Ralph.IRC.MockServer do
   ## Server
 
   def init(notify_pid) do
-    IO.puts("startin!")
+    Process.flag(:trap_exit, true)
     pid = self()
-    {:ok, conn} = :gen_tcp.listen(6667, [:binary, ip: {127, 0, 0, 1}, reuseaddr: true])
+
+    {:ok, conn} =
+      :gen_tcp.listen(6667, [
+        :binary,
+        ip: {127, 0, 0, 1},
+        reuseaddr: true,
+        active: false,
+        packet: :line
+      ])
 
     {:ok, accept_pid} = Task.start_link(fn -> accept_loop(pid, conn) end)
 
@@ -26,8 +34,11 @@ defmodule Ralph.IRC.MockServer do
     {:noreply, state}
   end
 
+  # def handle_info(_, state) do
+  #   {:noreply, state}
+  # end
+
   def terminate(_reason, {conn, _, _}) do
-    IO.puts("terminatin!")
     :gen_tcp.close(conn)
   end
 
@@ -35,8 +46,6 @@ defmodule Ralph.IRC.MockServer do
 
   defp accept_loop(pid, conn) do
     {:ok, client} = :gen_tcp.accept(conn)
-    :inet.setopts(client, packet: :line)
-
     :ok = :gen_tcp.controlling_process(client, pid)
 
     send(pid, {:client_connected, client})
@@ -58,7 +67,9 @@ defmodule Ralph.IRC.MockClient do
   ## Client
 
   def init({sock, pid}) do
-    :inet.setopts(sock, active: true)
+    :inet.setopts(sock, active: :once)
+
+    Process.flag(:trap_exit, true)
 
     {:ok, {sock, pid}}
   end
@@ -69,10 +80,15 @@ defmodule Ralph.IRC.MockClient do
     {:reply, :ok, state}
   end
 
-  def handle_info({:tcp, _, line}, {_conn, pid} = state) do
+  def handle_info({:tcp, _, line}, {conn, pid} = state) do
+    :inet.setopts(conn, active: :once)
     line = Ralph.IRC.Protocol.parse_line(line)
     send(pid, {:line, line})
 
     {:noreply, state}
+  end
+
+  def terminate(_reason, {conn, _}) do
+    :gen_tcp.close(conn)
   end
 end
