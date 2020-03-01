@@ -16,8 +16,6 @@ defmodule RalphTest do
       end
     end
 
-    setup_server!()
-
     run_scenario ignore_prelude: false do
       assert_line "NICK", ["test_nick"]
       assert_line "USER", ["chris", "chris", "chris", "chris"]
@@ -45,8 +43,6 @@ defmodule RalphTest do
       end
     end
 
-    setup_server!()
-
     run_scenario do
       write_line ":foo JOIN #test"
       write_line ":foo JOIN #test2"
@@ -72,8 +68,6 @@ defmodule RalphTest do
         privmsg ctx, "general on_kick handler called"
       end
     end
-
-    setup_server!()
 
     run_scenario do
       write_line ":foo JOIN #test"
