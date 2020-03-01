@@ -64,12 +64,12 @@ defmodule RalphTest do
       channel "#test" do
         on_kick fn %{channel: channel, reason: reason} = ctx ->
           join ctx, channel
-          privmsg ctx, "how dare you kick me for \"#{reason}\""
+          privmsg ctx, "you kicked me for reason: \"#{reason}\""
         end
       end
 
       on_kick fn ctx ->
-        privmsg ctx, "wait what?"
+        privmsg ctx, "general on_kick handler called"
       end
     end
 
@@ -80,8 +80,8 @@ defmodule RalphTest do
       write_line(":foo KICK #test test_nick :and stay out!")
 
       assert_line "JOIN", ["#test"]
-      assert_line "PRIVMSG", ["#test", "how dare you kick me for \"and stay out!\""]
-      assert_line "PRIVMSG", ["#test", "wait what?"]
+      assert_line "PRIVMSG", ["#test", "you kicked me for reason: \"and stay out!\""]
+      assert_line "PRIVMSG", ["#test", "general on_kick handler called"]
     end
   end
 end
