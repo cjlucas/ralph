@@ -3,18 +3,18 @@ defmodule Ralph.Bot do
 
   @moduledoc false
 
-  network :freenode do
-    server "irc.freenode.net"
-    nick "hithere"
-
-    on_kick fn ctx ->
-      IO.puts("whoaaaa #{inspect(ctx)}")
-    end
-
-    on_privmsg fn ctx ->
-      IO.puts("getting messages too?! whoa. #{inspect(ctx)}")
-    end
-  end
+  # network :freenode do
+  #   server "irc.freenode.net"
+  #   nick "hithere"
+  #
+  #   on_kick fn ctx ->
+  #     IO.puts("whoaaaa #{inspect(ctx)}")
+  #   end
+  #
+  #   on_privmsg fn ctx ->
+  #     IO.puts("getting messages too?! whoa. #{inspect(ctx)}")
+  #   end
+  # end
 
   network :freenode2 do
     server "irc.freenode.net"
@@ -38,6 +38,8 @@ defmodule Ralph.Bot do
 
     on_join fn %{channel: channel} = ctx ->
       privmsg ctx, "greetings! welcome to #{channel}"
+      IO.inspect("sending names for #{channel}")
+      IO.inspect(names(ctx, channel), label: "holy. shit. #{channel}")
     end
 
     on_part fn ctx ->
@@ -45,7 +47,8 @@ defmodule Ralph.Bot do
     end
 
     on_invite fn %{channel: channel} = ctx ->
-      join ctx, channel
+      x = join ctx, channel
+      IO.inspect(x, label: "on_invite join")
     end
   end
 end

@@ -3,9 +3,11 @@ defmodule Ralph.IRC.Supervisor do
 
   def start_link(config) do
     registry = Module.concat([config.mod, Registry])
+    reply_manager = Module.concat([config.mod, ReplyManager])
 
     children = [
-      {Ralph.IRC.NetworkRegistry, registry}
+      {Ralph.IRC.NetworkRegistry, registry},
+      {Ralph.IRC.ReplyManager, reply_manager}
     ]
 
     connections =
