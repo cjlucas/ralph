@@ -1,6 +1,8 @@
 defmodule Ralph.IRC.Connection do
   use GenServer
 
+  require Logger
+
   @moduledoc false
 
   defmodule State do
@@ -17,7 +19,12 @@ defmodule Ralph.IRC.Connection do
     GenServer.call(pid, {:write, data})
   end
 
+  def cast_write(pid, intermediate_codes, end_codes, data) do
+    GenServer.call(pid, {:write_async, intermediate_codes, end_codes, data})
+  end
+
   def do_write(conn, data) do
+    Logger.debug("--> #{data}")
     :gen_tcp.send(conn, [data, "\r\n"])
   end
 
@@ -42,6 +49,8 @@ defmodule Ralph.IRC.Connection do
     Enum.each(config.channels, fn %{name: name} ->
       data = Ralph.IRC.Protocol.join(name)
       do_write(conn, data)
+
+      :ok = Ralph.IRC.ReplyManager.register_request(Ralph.Bot.ReplyManager, nil, ["353"], ["366"])
     end)
 
     {:noreply, %{state | conn: conn}}
@@ -53,6 +62,24 @@ defmodule Ralph.IRC.Connection do
     {:reply, :ok, state}
   end
 
+  def handle_call(
+        {:write_async, intermediate_codes, end_codes, data},
+        from,
+        %{conn: conn} = state
+      ) do
+    do_write(conn, data)
+
+    :ok =
+      Ralph.IRC.ReplyManager.register_request(
+        Ralph.Bot.ReplyManager,
+        from,
+        intermediate_codes,
+        end_codes
+      )
+
+    {:noreply, state}
+  end
+
   def handle_info({:tcp, _sock, data}, %{bot: bot, config: config} = state) do
     pid = self()
 
@@ -60,6 +87,7 @@ defmodule Ralph.IRC.Connection do
 
     Task.start_link(fn ->
       bot.on_line({config.name, pid}, data)
+      :ok = Ralph.IRC.ReplyManager.handle_reply(Ralph.Bot.ReplyManager, data)
     end)
 
     {:noreply, state}
